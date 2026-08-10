@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader, type IScannerControls } from "@zxing/browser";
 import { BarcodeFormat, DecodeHintType } from "@zxing/library";
+import { isValidGtinChecksum } from "@/lib/barcodeChecksum";
 
 type BarcodeScannerProps = {
   active: boolean;
@@ -25,6 +26,8 @@ const ZXING_FORMATS = [
 
 const REDETECT_WINDOW_MS = 3000;
 const NATIVE_DETECT_INTERVAL_MS = 300;
+const CONSENSUS_READS_REQUIRED = 2;
+const CONSENSUS_WINDOW_MS = 1500;
 
 export function BarcodeScanner({ active, onDetect }: BarcodeScannerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -34,17 +37,48 @@ export function BarcodeScanner({ active, onDetect }: BarcodeScannerProps) {
   const lastDetectionRef = useRef<{ code: string; time: number } | null>(
     null
   );
+  const consensusRef = useRef<{
+    code: string;
+    count: number;
+    firstSeen: number;
+  } | null>(null);
 
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
 
   const handleDetected = useCallback(
     (code: string) => {
+      // A failed check digit almost always means the frame was misread
+      // (blur, glare, a bad angle) rather than a real, unknown barcode.
+      if (!isValidGtinChecksum(code)) return;
+
       const now = Date.now();
       const last = lastDetectionRef.current;
       if (last && last.code === code && now - last.time < REDETECT_WINDOW_MS) {
         return;
       }
+
+      // Checksums only catch ~90% of misreads, so also require the same
+      // code to be read twice in a row before acting on it — it's very
+      // unlikely a bad read produces the identical wrong number twice.
+      const previous = consensusRef.current;
+      let entry: { code: string; count: number; firstSeen: number };
+      if (
+        previous &&
+        previous.code === code &&
+        now - previous.firstSeen < CONSENSUS_WINDOW_MS
+      ) {
+        previous.count += 1;
+        entry = previous;
+      } else {
+        entry = { code, count: 1, firstSeen: now };
+        consensusRef.current = entry;
+        return;
+      }
+
+      if (entry.count < CONSENSUS_READS_REQUIRED) return;
+
+      consensusRef.current = null;
       lastDetectionRef.current = { code, time: now };
       onDetect(code);
     },
