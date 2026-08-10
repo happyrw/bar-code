@@ -4,7 +4,8 @@ export type LookedUpProduct = {
   brand: string | null;
   imageUrl: string | null;
   category: string | null;
-  source: "openfoodfacts" | "upcitemdb";
+  price: number | null;
+  source: "local" | "openfoodfacts" | "upcitemdb";
 };
 
 type OpenFoodFactsResponse = {
@@ -69,6 +70,7 @@ async function lookupOpenFoodFacts(
     imageUrl:
       data.product.image_front_url || data.product.image_url || null,
     category: data.product.categories?.split(",")[0]?.trim() || null,
+    price: null,
     source: "openfoodfacts",
   };
 }
@@ -91,6 +93,7 @@ async function lookupUpcItemDb(
     brand: item.brand || null,
     imageUrl: item.images?.[0] || null,
     category: item.category?.split(">")[0]?.trim() || null,
+    price: null,
     source: "upcitemdb",
   };
 }

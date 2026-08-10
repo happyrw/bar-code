@@ -96,6 +96,8 @@ export default async function InventoryPage() {
                   <p className="mt-1 text-xs text-gray-500">
                     Expires {item.expirationDate.toLocaleDateString()} · Qty{" "}
                     {item.quantity}
+                    {item.product.price !== null &&
+                      ` · ${Number(item.product.price).toFixed(2)} each`}
                   </p>
                 </div>
 

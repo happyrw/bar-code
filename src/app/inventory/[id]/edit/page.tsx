@@ -36,6 +36,7 @@ export default async function EditItemPage({
           brand: item.product.brand,
           imageUrl: item.product.imageUrl,
           category: item.product.category,
+          price: item.product.price === null ? null : Number(item.product.price),
           expirationDate: item.expirationDate.toISOString(),
           quantity: item.quantity,
           location: item.location,

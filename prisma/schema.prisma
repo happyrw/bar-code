@@ -17,6 +17,7 @@ model Product {
   brand    String?
   imageUrl String?
   category String?
+  price    Decimal?        @db.Decimal(10, 2)
   items    InventoryItem[]
 }
 

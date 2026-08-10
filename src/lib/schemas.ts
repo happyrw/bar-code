@@ -20,6 +20,10 @@ export const saveItemSchema = z.object({
     z.string().trim().url().optional()
   ),
   category: z.preprocess(emptyToUndefined, z.string().trim().optional()),
+  price: z.preprocess(
+    emptyToUndefined,
+    z.coerce.number().min(0).optional()
+  ),
   expirationDate: z
     .string()
     .min(1, "Expiration date is required")

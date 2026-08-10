@@ -11,6 +11,7 @@ export type ItemFormValues = {
   brand?: string | null;
   imageUrl?: string | null;
   category?: string | null;
+  price?: number | null;
   expirationDate?: string | null;
   quantity?: number;
   location?: string | null;
@@ -35,6 +36,7 @@ export function ItemForm({ mode, initial, onCancel }: ItemFormProps) {
   const [brand, setBrand] = useState(initial.brand ?? "");
   const [imageUrl, setImageUrl] = useState(initial.imageUrl ?? "");
   const [category, setCategory] = useState(initial.category ?? "");
+  const [price, setPrice] = useState(initial.price?.toString() ?? "");
   const [expirationDate, setExpirationDate] = useState(
     toDateInputValue(initial.expirationDate)
   );
@@ -53,6 +55,7 @@ export function ItemForm({ mode, initial, onCancel }: ItemFormProps) {
       brand,
       imageUrl,
       category,
+      price: price === "" ? undefined : Number(price),
       expirationDate,
       quantity,
       location,
@@ -151,6 +154,21 @@ export function ItemForm({ mode, initial, onCancel }: ItemFormProps) {
         <input
           value={imageUrl}
           onChange={(e) => setImageUrl(e.target.value)}
+          className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
+          placeholder="Optional"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700">
+          Price
+        </label>
+        <input
+          type="number"
+          min={0}
+          step="0.01"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
           className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
           placeholder="Optional"
         />
