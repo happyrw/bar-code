@@ -1,0 +1,31 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Product {
+  id       String          @id @default(cuid())
+  barcode  String?         @unique
+  name     String
+  brand    String?
+  imageUrl String?
+  category String?
+  items    InventoryItem[]
+}
+
+model InventoryItem {
+  id             String   @id @default(cuid())
+  productId      String
+  product        Product  @relation(fields: [productId], references: [id])
+  expirationDate DateTime
+  quantity       Int      @default(1)
+  location       String?
+  addedAt        DateTime @default(now())
+}
